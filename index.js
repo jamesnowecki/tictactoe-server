@@ -22,11 +22,10 @@ const handleMethod = (message) => {
             //JPN - create a new unique game Id and store in object
             const gameId = guid();
             games[gameId] = gameId;
-            console.log(games)
 
             const payload = {
                 method: 'create',
-                game: games[gameId],
+                gameId: games[gameId],
             };
             //JPN - Get this particular client's connection and return them new payload
             const clientConnection = clients[clientId].connection;
