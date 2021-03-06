@@ -1,7 +1,7 @@
 const http = require('http');
 const websocketServer = require('websocket').server;
 
-const guid = require('./src/generateGuid/generateGuid');
+const { guid } = require('./src/generateGuid/generateGuid');
 
 const httpServer = http.createServer();
 httpServer.listen(1984, () => console.log('Listening on 1984'));
