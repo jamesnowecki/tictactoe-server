@@ -2,6 +2,7 @@ const http = require('http');
 const websocketServer = require('websocket').server;
 
 const { guid } = require('./src/generateGuid/generateGuid');
+const startBoardState = require('./src/gameBoard/gameBoard');
 
 const httpServer = http.createServer();
 httpServer.listen(1984, () => console.log('Listening on 1984'));
@@ -62,7 +63,9 @@ const handleMethod = (message) => {
                 gameState: {
                     ...joinGame,
                     gameIsActive: numberOfPlayers === 2,
-                    activePlayerId: joinGame.clients[0].clientId
+                    activePlayerId: joinGame.clients[0].clientId,
+                    boardState: startBoardState
+
                 }
             }
             //JPN - Get each client connection and broadcast the gamestate
