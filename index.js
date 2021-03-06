@@ -14,25 +14,54 @@ const clients = {};
 const games = {};
 
 const handleMethod = (message) => {
-    const { method, clientId } = message;
+    const { method, clientId} = message;
 
     switch (method) {
         case 'create':
             console.log("create requested by player", clientId);
             //JPN - create a new unique game Id and store in object
             const gameId = guid();
-            games[gameId] = gameId;
+            games[gameId] = {
+                gameId: gameId,
+                clients: []
+            };
 
-            const payload = {
+            const createPayload = {
                 method: 'create',
-                gameId: games[gameId],
+                gameState: games[gameId],
             };
             //JPN - Get this particular client's connection and return them new payload
             const clientConnection = clients[clientId].connection;
-            clientConnection.send(JSON.stringify(payload));
+            clientConnection.send(JSON.stringify(createPayload));
             break;
         case 'join':
             console.log('join requested by player', clientId)
+            console.log('message:', message)
+            //JPN - Join an instantiated game by gameId
+            const gameInstanceId = message.gameState.gameId;
+            const joinGame = games[gameInstanceId];
+            //JPN - Max number of players in tictactoe is 2
+            if (joinGame.clients.length >= 2) {
+                console.log("game full")
+                //JPN - need to make a better error handling func here
+                return;
+            }
+            const color = {"0": "Red", "1": "Blue"}[joinGame.clients.length];
+            //JPN - Push client into the client array
+            joinGame.clients.push({
+                clientId: clientId,
+                color: color
+            });
+
+            const joinPayload = {
+                method: 'join',
+                gameState: joinGame
+            }
+            //JPN - Get each client connection and broadcast the gamestate
+            joinGame.clients.forEach(client => {
+                clients[client.clientId].connection.send(JSON.stringify(joinPayload))
+            })
+
             break;
         case 'play':
             console.log('play requested by player', clientId)
