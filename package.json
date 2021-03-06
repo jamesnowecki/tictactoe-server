@@ -18,5 +18,8 @@
   "bugs": {
     "url": "https://github.com/jamesnowecki/tictactoe-server/issues"
   },
-  "homepage": "https://github.com/jamesnowecki/tictactoe-server#readme"
+  "homepage": "https://github.com/jamesnowecki/tictactoe-server#readme",
+  "dependencies": {
+    "websocket": "^1.0.33"
+  }
 }
