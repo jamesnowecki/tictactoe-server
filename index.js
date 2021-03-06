@@ -2,6 +2,7 @@ const http = require('http');
 const websocketServer = require('websocket').server;
 
 const { guid } = require('./src/generateGuid/generateGuid');
+const handleMethod = require('./src/handleMethod/handleMethod')
 
 const httpServer = http.createServer();
 httpServer.listen(1984, () => console.log('Listening on 1984'));
@@ -21,8 +22,8 @@ wsServer.on('request', request => {
     connection.on('message', message => {
         //JPN - Receive a message from a client connection (comes in as utf8 data)
         //Ensure incoming message is in JSON format
-        const res = JSON.parse(message.utf8Data);
-        console.log("res: ", res)
+        const req = JSON.parse(message.utf8Data);
+        handleMethod(req)
     });
 
     //JPN -generate a new clientID and put it in our object list of clients
