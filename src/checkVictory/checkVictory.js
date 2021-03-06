@@ -9,7 +9,7 @@ const testForAllSameColor = (testArray) => {
 
 const checkForDraw = (boardState) => {
     let allOccupied = true;
-    
+    //JPN - loop through to see if all squares are occupied
     for (const [value] of Object.entries(boardState)) {
         if (!value.isOccupied) {
             allOccupied = false;
