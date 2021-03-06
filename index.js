@@ -47,7 +47,7 @@ const handleMethod = (message) => {
                 //JPN - need to make a better error handling func here
                 return;
             }
-            const color = {"0": "Red", "1": "Blue"}[joinGame.clients.length];
+            const color = {"0": "red", "1": "blue"}[joinGame.clients.length];
             //JPN - Push client into the client array
             joinGame.clients.push({
                 clientId: clientId,
@@ -55,9 +55,15 @@ const handleMethod = (message) => {
                 color: color
             });
 
+            const numberOfPlayers = joinGame.clients.length;
+
             const joinPayload = {
                 method: 'join',
-                gameState: joinGame
+                gameState: {
+                    ...joinGame,
+                    gameIsActive: numberOfPlayers === 2,
+                    activePlayerId: joinGame.clients[0].clientId
+                }
             }
             //JPN - Get each client connection and broadcast the gamestate
             joinGame.clients.forEach(client => {
@@ -67,6 +73,8 @@ const handleMethod = (message) => {
             break;
         case 'play':
             console.log('play requested by player', clientId)
+            console.log("message:", message)
+            break;
     }
 }
 
