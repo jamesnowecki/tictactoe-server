@@ -14,7 +14,7 @@ const clients = {};
 const games = {};
 
 const handleMethod = (message) => {
-    const { method, clientId} = message;
+    const { method, clientId, clientName} = message;
 
     switch (method) {
         case 'create':
@@ -38,8 +38,9 @@ const handleMethod = (message) => {
             console.log('join requested by player', clientId)
             console.log('message:', message)
             //JPN - Join an instantiated game by gameId
-            const gameInstanceId = message.gameState.gameId;
+            const gameInstanceId = message.gameId;
             const joinGame = games[gameInstanceId];
+            console.log('joinGame', joinGame)
             //JPN - Max number of players in tictactoe is 2
             if (joinGame.clients.length >= 2) {
                 console.log("game full")
@@ -50,6 +51,7 @@ const handleMethod = (message) => {
             //JPN - Push client into the client array
             joinGame.clients.push({
                 clientId: clientId,
+                clientName: clientName,
                 color: color
             });
 
