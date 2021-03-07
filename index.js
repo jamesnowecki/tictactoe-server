@@ -136,6 +136,7 @@ const handleMethod = (message) => {
             }
 
             const evaluateVictoryObj = checkVictory(newBoardState);
+            console.log("evalVic", evaluateVictoryObj)
             //JPN - Test for victory or draw and if needed end game.
             if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
                 console.log("running endgame block")
@@ -145,13 +146,12 @@ const handleMethod = (message) => {
                 };
 
                 //JPN - Update server instance gameState
-                games[playGameInstanceId].gameState = {
-                     ...games[playGame].gamestate,
-                     gameResult: evaluateVictoryObj
-                };
+                games[playGameInstanceId].gameResult = evaluateVictoryObj;
+
+                console.log('theGame',games[playGameInstanceId])
 
                 //JPN - Broadcast end of game result
-                playGame.clients.array.forEach(client => {
+                playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(endGamePayload))
                 });
             } 
