@@ -141,7 +141,6 @@ const handleMethod = (message) => {
             if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
                 console.log("running endgame block")
 
-
                 //JPN - Update server instance gameState
                 games[playGameInstanceId].gameResult = evaluateVictoryObj;
                 games[playGameInstanceId].gameIsActive = false;
@@ -164,8 +163,8 @@ const handleMethod = (message) => {
             } 
 
             break;
-    }
-}
+    };
+};
 
 wsServer.on('request', request => {
     //JPN - capture TCP connection - can put different protocols as first argument, null so open to anything (insecure for production)
@@ -195,6 +194,5 @@ wsServer.on('request', request => {
 
     //JPN - return an initial payload
     connection.send(JSON.stringify(payload));
-
 });
 
