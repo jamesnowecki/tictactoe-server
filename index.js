@@ -18,7 +18,7 @@ const games = {};
 
 const handleMethod = (message) => {
     const { method, clientId, clientName} = message;
-    console.info(`I've received a ${method} method`)
+    console.info(`I've received a ${method} method`);
 
     switch (method) {
         case 'create':
@@ -45,7 +45,7 @@ const handleMethod = (message) => {
             if (joinGame.clients.length >= 2) {
                 //JPN - need to make a better error handling func here
                 return;
-            }
+            };
             //JPN - assign color to joining player connection
             const color = {"0": "red", "1": "blue"}[joinGame.clients.length];
             //JPN - Push client into the client array
@@ -114,7 +114,6 @@ const handleMethod = (message) => {
                     }
                 };
 
-
                 //JPN- update server instance gameState
                 games[playGameInstanceId] = playPayload.gameState;
 
@@ -122,7 +121,7 @@ const handleMethod = (message) => {
                 playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(playPayload))
                 });
-            }
+            };
 
             const evaluateVictoryObj = checkVictory(newBoardState);
             //JPN - Test for victory or draw and if needed end game.
@@ -160,7 +159,7 @@ wsServer.on('request', request => {
         //JPN - Receive a message from a client connection (comes in as utf8 data)
         //Ensure incoming message is in JSON format
         const req = JSON.parse(message.utf8Data);
-        handleMethod(req)
+        handleMethod(req);
     });
 
     //JPN -generate a new clientID and put it in our object list of clients
@@ -178,4 +177,3 @@ wsServer.on('request', request => {
     //JPN - return an initial payload
     connection.send(JSON.stringify(payload));
 });
-
