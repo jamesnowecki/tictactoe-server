@@ -18,6 +18,7 @@ const games = {};
 
 const handleMethod = (message) => {
     const { method, clientId, clientName} = message;
+    console.log(`I've received a ${method} method`)
 
     switch (method) {
         case 'create':
@@ -39,11 +40,9 @@ const handleMethod = (message) => {
             break;
         case 'join':
             console.log('join requested by player', clientId)
-            console.log('message:', message)
             //JPN - Join an instantiated game by gameId
             const gameInstanceId = message.gameId;
             const joinGame = games[gameInstanceId];
-            console.log('joinGame', joinGame)
             //JPN - Max number of players in tictactoe is 2
             if (joinGame.clients.length >= 2) {
                 console.log("game full")
@@ -90,18 +89,17 @@ const handleMethod = (message) => {
             const moveMakingClientId = message.clientId;
             //JPN - The move object they are passing
             const incomingMove = message.move;
-            console.log('Move by client', moveMakingClientId);
-            console.log('MoveObj', incomingMove);
 
             const currentBoardState = playGame.boardState;
             let newBoardState;
             let nextPlayerId;
 
             //JPN - Check move is being made by the active player (turn based game), in a real time game maybe follow a 'last in wins' paradigm on moves, collate changes and then broadcast the gamestate regularly e.g. multiple times a second?
-            if (playGame.gameState.ActivePlayerId === moveMakingClientId) {
-                const activeClientColor = getClientById(playGame.gameState.clients, moveMakingClientId);
+            if (playGame.activePlayerId === moveMakingClientId) {
+                const activeClientColor = getClientById(playGame.clients, moveMakingClientId).color;
                 //JPN update the boardstate with the new move
-                nextPlayerId = getNonActiveClient(playGame.gameState.clients, moveMakingClientId);
+                nextPlayerId = getNonActiveClient(playGame.clients, moveMakingClientId).clientId;
+                console.log("nextplayer", nextPlayerId);
 
                 newBoardState = currentBoardState;
                 //JPN - Apply move
@@ -120,6 +118,12 @@ const handleMethod = (message) => {
                         boardState: newBoardState,
                     }
                 };
+
+                console.log("outGoingPayload", playPayload)
+
+                //JPN- update server instance gameState
+                games[playGame] = playPayload.gameState;
+
                 //JPN - Broadcast most recent legal play
                 playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(playPayload))
@@ -129,10 +133,17 @@ const handleMethod = (message) => {
             const evaluateVictoryObj = checkVictory(newBoardState);
             //JPN - Test for victory or draw and if needed end game.
             if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
+                console.log("running endgame block")
                 const endGamePayload = {
                     method: 'gameEnd',
                     gameResult: evaluateVictoryObj
-                }
+                };
+
+                //JPN - Update server instance gameState
+                games[playGame].gameState = {
+                     ...games[playGame].gamestate,
+                     gameResult: evaluateVictoryObj
+                };
 
                 //JPN - Broadcast end of game result
                 playGame.clients.array.forEach(client => {
