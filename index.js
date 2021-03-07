@@ -1,8 +1,10 @@
 const http = require('http');
 const websocketServer = require('websocket').server;
 
-const { guid } = require('./src/generateGuid/generateGuid');
+const guid = require('./src/generateGuid/generateGuid');
 const startBoardState = require('./src/gameBoard/gameBoard');
+const checkVictory = require('./src/checkVictory/checkVictory');
+const { getClientById, getNonActiveClient } = require('./src/getClients/getClients');
 
 const httpServer = http.createServer();
 httpServer.listen(1984, () => console.log('Listening on 1984'));
@@ -48,6 +50,7 @@ const handleMethod = (message) => {
                 //JPN - need to make a better error handling func here
                 return;
             }
+            //JPN - assign color to joining player connection
             const color = {"0": "red", "1": "blue"}[joinGame.clients.length];
             //JPN - Push client into the client array
             joinGame.clients.push({
@@ -65,18 +68,78 @@ const handleMethod = (message) => {
                     gameIsActive: numberOfPlayers === 2,
                     activePlayerId: joinGame.clients[0].clientId,
                     boardState: startBoardState
-
                 }
-            }
+            };
+
+            //JPN - Update the server instance of the boardState
+            games[gameInstanceId] = joinPayload.gameState;
+
             //JPN - Get each client connection and broadcast the gamestate
             joinGame.clients.forEach(client => {
                 clients[client.clientId].connection.send(JSON.stringify(joinPayload))
-            })
+            });
 
             break;
         case 'play':
-            console.log('play requested by player', clientId)
-            console.log("message:", message)
+            console.log('play requested by player', clientId);
+            console.log("message:", message);
+            const playGameInstanceId = message.gameId;
+            const playGame = games[playGameInstanceId];
+
+            ///JPN - Who is attempting to make move
+            const moveMakingClientId = message.clientId;
+            //JPN - The move object they are passing
+            const incomingMove = message.move;
+            console.log('Move by client', moveMakingClientId);
+            console.log('MoveObj', incomingMove);
+
+            const currentBoardState = playGame.boardState;
+            let newBoardState;
+            let nextPlayerId;
+
+            //JPN - Check move is being made by the active player (turn based game), in a real time game maybe follow a 'last in wins' paradigm on moves, collate changes and then broadcast the gamestate regularly e.g. multiple times a second?
+            if (playGame.gameState.ActivePlayerId === moveMakingClientId) {
+                const activeClientColor = getClientById(playGame.gameState.clients, moveMakingClientId);
+                //JPN update the boardstate with the new move
+                nextPlayerId = getNonActiveClient(playGame.gameState.clients, moveMakingClientId);
+
+                newBoardState = currentBoardState;
+                //JPN - Apply move
+                newBoardState[incomingMove.moveSquareId] = {
+                    id: incomingMove.moveSquareId,
+                    isOccupied: true,
+                    color: activeClientColor
+                };
+                //JPN - load next payload
+                const playPayload = {
+                    method: 'update',
+                    gameState: {
+                        ...playGame,
+                        gameIsActive: true,
+                        activePlayerId: nextPlayerId,
+                        boardState: newBoardState,
+                    }
+                };
+                //JPN - Broadcast most recent legal play
+                playGame.clients.forEach(client => {
+                    clients[client.clientId].connection.send(JSON.stringify(playPayload))
+                });
+            }
+
+            const evaluateVictoryObj = checkVictory(newBoardState);
+            //JPN - Test for victory or draw and if needed end game.
+            if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
+                const endGamePayload = {
+                    method: 'gameEnd',
+                    gameResult: evaluateVictoryObj
+                }
+
+                //JPN - Broadcast end of game result
+                playGame.clients.array.forEach(client => {
+                    clients[client.clientId].connection.send(JSON.stringify(endGamePayload))
+                });
+            } 
+
             break;
     }
 }
