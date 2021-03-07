@@ -1,7 +1,8 @@
 const winStates = require('../gameBoard/winStates')
 
 const testForAllSameColor = (testArray) => {
-    const allEqual = testArray.every(value => value === testArray[0])
+    //JPN - Check all array is same color and NOT WHITE (empty)
+    const allEqual = testArray.every(value => value === testArray[0] && value !== 'white')
 
     return allEqual ? { victoryAchieved: true, winningColor: testArray[0]}
     : { victoryAchieved: false, winningColor: 'no victor' };
@@ -45,7 +46,7 @@ const checkVictory = (boardState) => {
         winningColor: winningColor
     };
 
-    if (result.victoryAchieved = false) {
+    if (!result.victoryAchieved) {
         const isDraw = checkForDraw(boardState);
 
         if (isDraw) {

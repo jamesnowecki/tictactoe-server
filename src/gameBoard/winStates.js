@@ -7,6 +7,6 @@ const winStates = [
     ['A3', 'B3', 'C3'],
     ['A1', 'B2', 'C3'],
     ['A3', 'B2', 'C1']
-]
+];
 
 module.exports = winStates;

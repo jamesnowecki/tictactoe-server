@@ -45,6 +45,6 @@ const startBoardState = {
       isOccupied: false,
       color: 'white'
     }
-  }
+  };
 
   module.exports = startBoardState;
