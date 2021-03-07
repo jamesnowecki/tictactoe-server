@@ -91,6 +91,7 @@ const handleMethod = (message) => {
             const incomingMove = message.move;
 
             const currentBoardState = playGame.boardState;
+            console.log("curBoard", currentBoardState)
             let newBoardState;
             let nextPlayerId;
 
@@ -99,15 +100,18 @@ const handleMethod = (message) => {
                 const activeClientColor = getClientById(playGame.clients, moveMakingClientId).color;
                 //JPN update the boardstate with the new move
                 nextPlayerId = getNonActiveClient(playGame.clients, moveMakingClientId).clientId;
-                console.log("nextplayer", nextPlayerId);
 
                 newBoardState = currentBoardState;
                 //JPN - Apply move
+                console.log('moveId', incomingMove.moveSquareId)
+                console.log('newBoard before apply', newBoardState)
+                console.log('try board sq', newBoardState[incomingMove.moveSquareId])
                 newBoardState[incomingMove.moveSquareId] = {
                     id: incomingMove.moveSquareId,
                     isOccupied: true,
                     color: activeClientColor
                 };
+                console.log("new board after apply", newBoardState)
                 //JPN - load next payload
                 const playPayload = {
                     method: 'update',
@@ -120,9 +124,10 @@ const handleMethod = (message) => {
                 };
 
                 console.log("outGoingPayload", playPayload)
+                console.log("outGoingBoard", playPayload.gameState.boardState)
 
                 //JPN- update server instance gameState
-                games[playGame] = playPayload.gameState;
+                games[playGameInstanceId] = playPayload.gameState;
 
                 //JPN - Broadcast most recent legal play
                 playGame.clients.forEach(client => {
@@ -140,7 +145,7 @@ const handleMethod = (message) => {
                 };
 
                 //JPN - Update server instance gameState
-                games[playGame].gameState = {
+                games[playGameInstanceId].gameState = {
                      ...games[playGame].gamestate,
                      gameResult: evaluateVictoryObj
                 };
