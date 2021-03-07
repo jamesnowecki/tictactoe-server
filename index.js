@@ -140,19 +140,26 @@ const handleMethod = (message) => {
             //JPN - Test for victory or draw and if needed end game.
             if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
                 console.log("running endgame block")
-                const endGamePayload = {
-                    method: 'gameEnd',
-                    gameResult: evaluateVictoryObj
-                };
+
 
                 //JPN - Update server instance gameState
                 games[playGameInstanceId].gameResult = evaluateVictoryObj;
+                games[playGameInstanceId].gameIsActive = false;
 
-                console.log('theGame',games[playGameInstanceId])
+                const endGamePayload = {
+                    method: 'gameEnd',
+                    gameState: games[playGameInstanceId]
+                };
+
+                console.log('endGame payload',endGamePayload)
 
                 //JPN - Broadcast end of game result
                 playGame.clients.forEach(client => {
-                    clients[client.clientId].connection.send(JSON.stringify(endGamePayload))
+                    clients[client.clientId].connection.send(JSON.stringify(endGamePayload));
+                });
+                //JPN - game is finished so close all connections
+                playGame.clients.forEach(client => {
+                    clients[client.clientId].connection.close();
                 });
             } 
 
