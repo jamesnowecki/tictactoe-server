@@ -21,8 +21,6 @@ const checkForDraw = (boardState) => {
 };
 
 const checkVictory = (boardState) => {
-    console.log("checkVictory running");
-    console.log("checVic board handed", boardState)
     let victoryAchieved = false;
     let winningColor = 'no victor';
     //JPN - Loop through array of possible winning combos

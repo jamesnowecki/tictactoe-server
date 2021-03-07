@@ -7,7 +7,7 @@ const checkVictory = require('./src/checkVictory/checkVictory');
 const { getClientById, getNonActiveClient } = require('./src/getClients/getClients');
 
 const httpServer = http.createServer();
-httpServer.listen(1984, () => console.log('Listening on 1984'));
+httpServer.listen(1984, () => console.info('Listening on 1984'));
 
 const wsServer = new websocketServer({
     'httpServer': httpServer
@@ -18,11 +18,10 @@ const games = {};
 
 const handleMethod = (message) => {
     const { method, clientId, clientName} = message;
-    console.log(`I've received a ${method} method`)
+    console.info(`I've received a ${method} method`)
 
     switch (method) {
         case 'create':
-            console.log("create requested by player", clientId);
             //JPN - create a new unique game Id and store in object
             const gameId = guid();
             games[gameId] = {
@@ -39,13 +38,11 @@ const handleMethod = (message) => {
             clientConnection.send(JSON.stringify(createPayload));
             break;
         case 'join':
-            console.log('join requested by player', clientId)
             //JPN - Join an instantiated game by gameId
             const gameInstanceId = message.gameId;
             const joinGame = games[gameInstanceId];
             //JPN - Max number of players in tictactoe is 2
             if (joinGame.clients.length >= 2) {
-                console.log("game full")
                 //JPN - need to make a better error handling func here
                 return;
             }
@@ -80,8 +77,6 @@ const handleMethod = (message) => {
 
             break;
         case 'play':
-            console.log('play requested by player', clientId);
-            console.log("message:", message);
             const playGameInstanceId = message.gameId;
             const playGame = games[playGameInstanceId];
 
@@ -91,7 +86,6 @@ const handleMethod = (message) => {
             const incomingMove = message.move;
 
             const currentBoardState = playGame.boardState;
-            console.log("curBoard", currentBoardState)
             let newBoardState;
             let nextPlayerId;
 
@@ -103,15 +97,12 @@ const handleMethod = (message) => {
 
                 newBoardState = currentBoardState;
                 //JPN - Apply move
-                console.log('moveId', incomingMove.moveSquareId)
-                console.log('newBoard before apply', newBoardState)
-                console.log('try board sq', newBoardState[incomingMove.moveSquareId])
                 newBoardState[incomingMove.moveSquareId] = {
                     id: incomingMove.moveSquareId,
                     isOccupied: true,
                     color: activeClientColor
                 };
-                console.log("new board after apply", newBoardState)
+
                 //JPN - load next payload
                 const playPayload = {
                     method: 'update',
@@ -123,8 +114,6 @@ const handleMethod = (message) => {
                     }
                 };
 
-                console.log("outGoingPayload", playPayload)
-                console.log("outGoingBoard", playPayload.gameState.boardState)
 
                 //JPN- update server instance gameState
                 games[playGameInstanceId] = playPayload.gameState;
@@ -136,11 +125,8 @@ const handleMethod = (message) => {
             }
 
             const evaluateVictoryObj = checkVictory(newBoardState);
-            console.log("evalVic", evaluateVictoryObj)
             //JPN - Test for victory or draw and if needed end game.
             if (evaluateVictoryObj.victoryAchieved || evaluateVictoryObj.winningColor === 'draw') {
-                console.log("running endgame block")
-
                 //JPN - Update server instance gameState
                 games[playGameInstanceId].gameResult = evaluateVictoryObj;
                 games[playGameInstanceId].gameIsActive = false;
@@ -149,8 +135,6 @@ const handleMethod = (message) => {
                     method: 'gameEnd',
                     gameState: games[playGameInstanceId]
                 };
-
-                console.log('endGame payload',endGamePayload)
 
                 //JPN - Broadcast end of game result
                 playGame.clients.forEach(client => {
@@ -170,13 +154,12 @@ wsServer.on('request', request => {
     //JPN - capture TCP connection - can put different protocols as first argument, null so open to anything (insecure for production)
     const connection = request.accept(null, request.origin);
 
-    connection.on('open', () => console.log("opened a connection"));
-    connection.on('close', () => console.log('close connection'));
+    connection.on('open', () => console.info("opened a connection"));
+    connection.on('close', () => console.info('close connection'));
     connection.on('message', message => {
         //JPN - Receive a message from a client connection (comes in as utf8 data)
         //Ensure incoming message is in JSON format
         const req = JSON.parse(message.utf8Data);
-        console.log('Ive got a message')
         handleMethod(req)
     });
 
