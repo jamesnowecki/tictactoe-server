@@ -140,11 +140,39 @@ const handleMethod = (message) => {
                 playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(endGamePayload));
                 });
+
+
                 //JPN - game is finished so close all connections
-                playGame.clients.forEach(client => {
-                    clients[client.clientId].connection.close();
-                });
+                // playGame.clients.forEach(client => {
+                //     clients[client.clientId].connection.close();
+                // });
             } 
+
+            break;
+        case 'reset':
+
+            const resetGameInstanceId = message.gameId;
+            const resetGame = games[resetGameInstanceId];
+
+            //JPN - Remove the victory object from instance
+            delete resetGame.gameResult;
+            //JPN - Provide a payload resetting the boardstate, but maintaining the current players and colors
+            const resetGamePayload = {
+                method: 'reset',
+                gameState: {
+                    ...resetGame,
+                    gameIsActive: true,
+                    boardState: startBoardState
+                }
+            };
+
+            //JPN - Update the server instance of the gamestate
+            games[resetGameInstanceId] = resetGamePayload.gameState;
+
+            //JPN - Broadcast new gameState
+            resetGame.clients.forEach(client => {
+                clients[client.clientId].connection.send(JSON.stringify(resetGamePayload));
+            });
 
             break;
     };
