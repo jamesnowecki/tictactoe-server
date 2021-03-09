@@ -11,8 +11,8 @@ const testForAllSameColor = (testArray) => {
 const checkForDraw = (boardState) => {
     let allOccupied = true;
     //JPN - loop through to see if all squares are occupied
-    for (const [value] of Object.entries(boardState)) {
-        if (!value.isOccupied) {
+    for (const square in boardState) {
+        if (!boardState[square].isOccupied) {
             allOccupied = false;
         };
     };
@@ -24,13 +24,12 @@ const checkVictory = (boardState) => {
     let victoryAchieved = false;
     let winningColor = 'no victor';
     //JPN - Loop through array of possible winning combos
-    for (let i= 0; i < winStates.length -1; i++) {
+    for (let i= 0; i < winStates.length; i++) {
         const testArray = [];
         //JPN - Push the colors of the potential victory connection into an array
         winStates[i].forEach(square => {
             testArray.push(boardState[square].color)
         });
-
         const testResult = testForAllSameColor(testArray);
         victoryAchieved = testResult.victoryAchieved;
         winningColor = testResult.winningColor;

@@ -33,7 +33,6 @@ const startBoardState = {
       id: 'C1',
       isOccupied: false,
       color: 'white'
-
     },
     C2: {
       id: 'C2',
