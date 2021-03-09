@@ -21,17 +21,15 @@ const checkForDraw = (boardState) => {
 };
 
 const checkVictory = (boardState) => {
-    console.log("checking for win")
     let victoryAchieved = false;
     let winningColor = 'no victor';
     //JPN - Loop through array of possible winning combos
-    for (let i= 0; i < winStates.length -1; i++) {
+    for (let i= 0; i < winStates.length; i++) {
         const testArray = [];
         //JPN - Push the colors of the potential victory connection into an array
         winStates[i].forEach(square => {
             testArray.push(boardState[square].color)
         });
-
         const testResult = testForAllSameColor(testArray);
         victoryAchieved = testResult.victoryAchieved;
         winningColor = testResult.winningColor;
@@ -47,19 +45,13 @@ const checkVictory = (boardState) => {
         winningColor: winningColor
     };
 
-    console.log("resObj", result)
-
     if (!result.victoryAchieved) {
-        console.log("No victory yet")
         const isDraw = checkForDraw(boardState);
-        console.log("isDraw:", isDraw)
 
         if (isDraw) {
             result.winningColor = 'draw'
         };
     };
-
-    console.log(result)
 
     return result;
 };
