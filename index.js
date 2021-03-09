@@ -1,7 +1,8 @@
 const http = require('http');
 const websocketServer = require('websocket').server;
+const guid = require('uuid').v4;
 
-const guid = require('./src/generateGuid/generateGuid');
+// const guid = require('./src/generateGuid/generateGuid');
 const startBoardState = require('./src/gameBoard/gameBoard');
 const checkVictory = require('./src/checkVictory/checkVictory');
 const { getClientById, getNonActiveClient } = require('./src/getClients/getClients');
