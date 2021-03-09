@@ -141,12 +141,6 @@ const handleMethod = (message) => {
                 playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(endGamePayload));
                 });
-
-
-                //JPN - game is finished so close all connections
-                // playGame.clients.forEach(client => {
-                //     clients[client.clientId].connection.close();
-                // });
             } 
 
             break;

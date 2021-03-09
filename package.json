@@ -4,7 +4,6 @@
   "description": "Websocket server for a basic game",
   "main": "index.js",
   "scripts": {
-    "test": "test",
     "start": "node index.js"
   },
   "repository": {
