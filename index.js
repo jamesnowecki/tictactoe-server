@@ -154,25 +154,30 @@ const handleMethod = (message) => {
             const resetGameInstanceId = message.gameId;
             const resetGame = games[resetGameInstanceId];
 
+            //JPN - Only allow a reset if the game is truly over, to prevent reset of a game in progress
+            if (!resetGame.gameIsActive) {
+                delete resetGame.gameResult;
+                //JPN - Provide a payload resetting the boardstate, but maintaining the current players and colors
+                const resetGamePayload = {
+                    method: 'reset',
+                    gameState: {
+                        ...resetGame,
+                        gameIsActive: true,
+                        boardState: startBoardState
+                    }
+                };
+    
+                //JPN - Update the server instance of the gamestate
+                games[resetGameInstanceId] = resetGamePayload.gameState;
+    
+                //JPN - Broadcast new gameState
+                resetGame.clients.forEach(client => {
+                    clients[client.clientId].connection.send(JSON.stringify(resetGamePayload));
+                });
+    
+            }
+
             //JPN - Remove the victory object from instance
-            delete resetGame.gameResult;
-            //JPN - Provide a payload resetting the boardstate, but maintaining the current players and colors
-            const resetGamePayload = {
-                method: 'reset',
-                gameState: {
-                    ...resetGame,
-                    gameIsActive: true,
-                    boardState: startBoardState
-                }
-            };
-
-            //JPN - Update the server instance of the gamestate
-            games[resetGameInstanceId] = resetGamePayload.gameState;
-
-            //JPN - Broadcast new gameState
-            resetGame.clients.forEach(client => {
-                clients[client.clientId].connection.send(JSON.stringify(resetGamePayload));
-            });
 
             break;
     };
