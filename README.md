@@ -37,4 +37,4 @@ Refactor comments:
  - Bug with the sharing of gamestates was caused by a lack of understanding on my part about shallow vs deep equality of objects in javascript. I thought I had created a new reference, whereas instead I had created two references to the same object in memory. Not certain if JSON.parse(JSON.stringify()) is the cleanest way to create a deep copy, but seems to work and eliminate the bug here.
 
 
-Coded to 'With Teeth' (Nine Inch Nails, 2005), 'Twilight' (Boa, 2001), 'The Impossible Kid' (Aesop Rock, 2016), 'Conditions of My Parole' (Puscifer, 2011).
+Coded to 'With Teeth' (Nine Inch Nails, 2005), 'Twilight' (Boa, 2001), 'The Impossible Kid' (Aesop Rock, 2016), 'Conditions of My Parole' (Puscifer, 2011), 'Koi No Yokan' (Deftones, 2012), 'Eat the Elephant' (A Perfect Circle, 2018).
