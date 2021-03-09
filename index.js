@@ -1,7 +1,8 @@
 const http = require('http');
 const websocketServer = require('websocket').server;
+const guid = require('uuid').v4;
 
-const guid = require('./src/generateGuid/generateGuid');
+// const guid = require('./src/generateGuid/generateGuid');
 const startBoardState = require('./src/gameBoard/gameBoard');
 const checkVictory = require('./src/checkVictory/checkVictory');
 const { getClientById, getNonActiveClient } = require('./src/getClients/getClients');
@@ -57,13 +58,14 @@ const handleMethod = (message) => {
 
             const numberOfPlayers = joinGame.clients.length;
 
+            //JPN - WRT boardState - Need to make a deep copy of the imported start board so as NOT to mutate it. Otherwise the other game instances will be instantiated with non-clean boards.
             const joinPayload = {
                 method: 'join',
                 gameState: {
                     ...joinGame,
                     gameIsActive: numberOfPlayers === 2,
                     activePlayerId: joinGame.clients[0].clientId,
-                    boardState: startBoardState
+                    boardState: JSON.parse(JSON.stringify(startBoardState))
                 }
             };
 
@@ -139,11 +141,37 @@ const handleMethod = (message) => {
                 playGame.clients.forEach(client => {
                     clients[client.clientId].connection.send(JSON.stringify(endGamePayload));
                 });
-                //JPN - game is finished so close all connections
-                playGame.clients.forEach(client => {
-                    clients[client.clientId].connection.close();
-                });
             } 
+
+            break;
+        case 'reset':
+            const resetGameInstanceId = message.gameId;
+            const resetGame = games[resetGameInstanceId];
+
+            //JPN - Only allow a reset if the game is truly over, to prevent reset of a game in progress. Not sure how I feel about this from a user perspective. In a game like this it's ok, but in longer games people would probably want to be able to reset if the board state became untenable for them (e.g. resign and play again).
+            if (!resetGame.gameIsActive) {
+                 //JPN - Remove the victory object from instance
+                delete resetGame.gameResult;
+                //JPN - Provide a payload resetting the boardstate, but maintaining the current players and colors. Need to make a deep copy of the startBoardState so as not to mutate it. Cause of the problematic bugs.
+                const resetGamePayload = {
+                    method: 'reset',
+                    gameState: {
+                        ...resetGame,
+                        gameIsActive: true,
+                        boardState: JSON.parse(JSON.stringify(startBoardState))
+                    }
+                };
+    
+                //JPN - Update the server instance of the gamestate
+                games[resetGameInstanceId] = resetGamePayload.gameState;
+    
+                //JPN - Broadcast new gameState
+                resetGame.clients.forEach(client => {
+                    clients[client.clientId].connection.send(JSON.stringify(resetGamePayload));
+                });
+    
+            }
+
 
             break;
     };
