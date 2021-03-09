@@ -154,7 +154,7 @@ const handleMethod = (message) => {
             const resetGameInstanceId = message.gameId;
             const resetGame = games[resetGameInstanceId];
 
-            //JPN - Only allow a reset if the game is truly over, to prevent reset of a game in progress
+            //JPN - Only allow a reset if the game is truly over, to prevent reset of a game in progress. Not sure how I feel about this from a user perspective. In a game like this it's ok, but in longer games people would probably want to be able to reset if the board state became untenable for them (e.g. resign and play again).
             if (!resetGame.gameIsActive) {
                 delete resetGame.gameResult;
                 //JPN - Provide a payload resetting the boardstate, but maintaining the current players and colors
